@@ -361,7 +361,7 @@ def train_run(idx):
                         test_size=test_size,
                         train_size=train_size,
                         target_col="Dgv",
-                        use_sweden=True,
+                        use_sweden=False,
                         test_seed=test_seed,
                         train_seed=train_seed)
                     for v1 in v1_list:
