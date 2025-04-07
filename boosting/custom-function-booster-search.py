@@ -24,7 +24,7 @@ train_seed_list = [1]
 def create_train_test_split(test_size=0.25,
                             train_size=0.5,
                             target_col="Dgv",
-                            use_sweden=True,
+                            use_sweden=False,
                             test_seed=1,
                             train_seed=1):
 

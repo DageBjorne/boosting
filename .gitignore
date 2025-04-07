@@ -304,3 +304,4 @@ dump.txt
 *.pth
 *.npy
 boosting/imgs
+boosting/imgs_lett

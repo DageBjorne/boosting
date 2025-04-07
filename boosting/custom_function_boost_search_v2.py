@@ -13,7 +13,7 @@ v1s = [0.005, 0.007, 0.01, 0.03, 0.07]
 target_tree_size_list = [1, 2, 3, 4]
 source_tree_size_list = [1, 2, 3, 4]
 decay_factor_list = [0.97, 0.99, 0.993, 0.995, 0.997]
-train_size_list = [0.1, 0.25, 0.5, 0.75, 1.0]
+train_size_list = [0.1, 0.25, 0.5, 0.75, 0.99]
 test_size_list = [0.25]
 epoch_list = [400, 600]
 alpha_0_list = [1.0]
@@ -27,7 +27,7 @@ def train_run(idx):
     def create_train_test_split(test_size=0.25,
                                 train_size=0.5,
                                 target_col="Dgv",
-                                use_sweden=True,
+                                use_sweden=False,
                                 test_seed=1,
                                 train_seed=1):
 
@@ -410,7 +410,8 @@ def train_run(idx):
                                                 decay_factor, alpha_0,
                                                 test_rmse
                                             ]
-                                            df.to_csv(f'results_{v1}.csv')
+                                            df.to_csv(
+                                                f'results_lett_{idx}.csv')
                                             # Plot loss curve
                                             plt.plot(
                                                 range(1,
@@ -429,9 +430,9 @@ def train_run(idx):
                                             ])
                                             plt.savefig(
                                                 os.path.join(
-                                                    'imgs',
+                                                    'imgs_lett',
                                                     str(int(i)) + '_' +
-                                                    str(v1) + '.jpg'))
+                                                    str(idx) + '.jpg'))
                                             plt.close('all')
 
                                             i += 1
