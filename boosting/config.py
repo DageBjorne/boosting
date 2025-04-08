@@ -1,5 +1,5 @@
-RESPONSE = 'D_AVERAGE'  #''grundyta'
-TARGET = 'N.Norrland'  #Lettland
+RESPONSE = 'Dgv'  #'Basal_area'
+TARGET = 'Norrland'  #Lettland
 
 # predictor_columns
 predictor_columns = [
