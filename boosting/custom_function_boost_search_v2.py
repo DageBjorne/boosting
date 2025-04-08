@@ -28,26 +28,28 @@ def train_run(idx):
         target_column = c.RESPONSE
 
         #data from Svedala
-        data_sweden = pd.read_csv(
-            'Image_data/merged_data_permanent_cleaned.csv', index_col=[0])
+        data_sweden = pd.read_csv('data/merged_data_permanent_cleaned.csv',
+                                  index_col=[0])
 
         #rename 'Hgv' to 'H_AVERAGE'
         #data_sweden = data_sweden.rename(columns={RESPONSE: "D_AVERAGE"})
 
         #for training and testing on Sweden only
-        train_target = data_sweden[data_sweden['area_code'] == 4]
+        data_train_sweden_1 = data_sweden[data_sweden['area_code'] == 4]
         data_train_sweden_2 = data_sweden[data_sweden['area_code'] == 2]
         data_train_sweden_3 = data_sweden[data_sweden['area_code'] == 3]
         data_train_sweden_4 = data_sweden[data_sweden['area_code'] == 1]
 
         #data_train_sweden_234 = data_train_sweden_4
-        train_source = pd.concat([data_train_sweden_2, data_train_sweden_3])
-        train_source = pd.concat([train_source, data_train_sweden_4])
-        data_train_sweden, test_target = train_test_split(
-            train_target, test_size=test_size,
+        data_train_sweden_234 = pd.concat(
+            [data_train_sweden_2, data_train_sweden_3])
+        data_train_sweden_234 = pd.concat(
+            [data_train_sweden_234, data_train_sweden_4])
+        data_train_sweden, data_test_sweden_1 = train_test_split(
+            data_train_sweden_1, test_size=test_size,
             random_state=test_seed)  #random_state is fixed
 
-        train_target, _ = train_test_split(
+        data_train_sweden_1, data_test = train_test_split(
             data_train_sweden,
             test_size=1 - train_size,
             random_state=train_seed
@@ -55,28 +57,27 @@ def train_run(idx):
 
         if TARGET == 'Lettland':
             #evaluate and rain on latvia instead (keep naming for simplicity)
-            data_latvia = pd.read_csv(
-                'Latvian_Image_data/merged_data_cleaned.csv')
-            data_train_sweden, test_target = train_test_split(
+            data_latvia = pd.read_csv('data/merged_data_cleaned_lettland.csv')
+            data_train_sweden, data_test_sweden_1 = train_test_split(
                 data_latvia, test_size=test_size,
                 random_state=test_seed)  #random_state is fixed
 
-            train_target, _ = train_test_split(
+            data_train_sweden_1, data_test = train_test_split(
                 data_train_sweden,
                 test_size=1 - train_size,
                 random_state=train_seed
             )  #random state is not fixed, data_test unused
 
         #"General" base dataset (to use for transfer)
-        ahat_train = np.array(train_source[predictor_columns])
-        bhat_train = np.array(train_source[target_column])
+        ahat_train = np.array(data_train_sweden_234[predictor_columns])
+        bhat_train = np.array(data_train_sweden_234[target_column])
 
         #Specific train and test set
-        a_train = np.array(train_target[predictor_columns])
-        b_train = np.array(train_target[target_column])
+        a_train = np.array(data_train_sweden_1[predictor_columns])
+        b_train = np.array(data_train_sweden_1[target_column])
 
-        x_test = np.array(test_target[predictor_columns])
-        y_test = np.array(test_target[target_column])
+        x_test = np.array(data_test_sweden_1[predictor_columns])
+        y_test = np.array(data_test_sweden_1[target_column])
 
         return ahat_train, bhat_train, a_train, b_train, x_test, y_test
 
@@ -395,28 +396,29 @@ def train_run(idx):
                                                 test_rmse
                                             ]
                                             df.to_csv(
-                                                f'results_lett_{idx}.csv')
+                                                f'res/results_{c.TARGET}_{c.RESPONSE}_{idx}.csv'
+                                            )
                                             # Plot loss curve
-                                            plt.plot(
-                                                range(1,
-                                                      len(losses_target) + 1),
-                                                losses_target)
-                                            plt.plot(
-                                                range(1,
-                                                      len(losses_source) + 1),
-                                                losses_source)
-                                            plt.plot(epochs_test, losses_test)
-                                            plt.xlabel("Iteration")
-                                            plt.ylabel("RMSE Loss")
-                                            plt.legend([
-                                                'target', 'source',
-                                                'test (target)'
-                                            ])
-                                            plt.savefig(
-                                                os.path.join(
-                                                    'imgs_lett',
-                                                    str(int(i)) + '_' +
-                                                    str(idx) + '.jpg'))
-                                            plt.close('all')
+                                            # plt.plot(
+                                            #     range(1,
+                                            #           len(losses_target) + 1),
+                                            #     losses_target)
+                                            # plt.plot(
+                                            #     range(1,
+                                            #           len(losses_source) + 1),
+                                            #     losses_source)
+                                            # plt.plot(epochs_test, losses_test)
+                                            # plt.xlabel("Iteration")
+                                            # plt.ylabel("RMSE Loss")
+                                            # plt.legend([
+                                            #     'target', 'source',
+                                            #     'test (target)'
+                                            # ])
+                                            # plt.savefig(
+                                            #     os.path.join(
+                                            #         'imgs_lett',
+                                            #         str(int(i)) + '_' +
+                                            #         str(idx) + '.jpg'))
+                                            # plt.close('all')
 
                                             i += 1
