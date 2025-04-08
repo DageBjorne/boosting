@@ -9,20 +9,11 @@ from sklearn.tree import DecisionTreeRegressor
 import matplotlib.pyplot as plt
 import os
 
-v1s = [0.005, 0.007, 0.01, 0.03, 0.07]
-target_tree_size_list = [1, 2, 3, 4]
-source_tree_size_list = [1, 2, 3, 4]
-decay_factor_list = [0.97, 0.99, 0.993, 0.995, 0.997]
-train_size_list = [0.1, 0.25, 0.5, 0.75, 0.99]
-test_size_list = [0.25]
-epoch_list = [400, 600]
-alpha_0_list = [1.0]
-test_seed_list = [1]
-train_seed_list = [1]
+import config as c
 
 
 def train_run(idx):
-    v1_list = [v1s[int(idx)]]
+    v1_list = [c.v1s[int(idx)]]
 
     def create_train_test_split(test_size=0.25,
                                 train_size=0.5,
@@ -353,10 +344,10 @@ def train_run(idx):
     ])
 
     i = 0
-    for train_seed in train_seed_list:
-        for test_seed in test_seed_list:
-            for train_size in train_size_list:
-                for test_size in test_size_list:
+    for train_seed in c.train_seed_list:
+        for test_seed in c.test_seed_list:
+            for train_size in c.train_size_list:
+                for test_size in c.test_size_list:
                     ahat_train, bhat_train, a_train, b_train, x_test, y_test = create_train_test_split(
                         test_size=test_size,
                         train_size=train_size,
@@ -366,11 +357,11 @@ def train_run(idx):
                         train_seed=train_seed)
                     for v1 in v1_list:
                         v2 = v1
-                        for target_tree_size in target_tree_size_list:
-                            for source_tree_size in source_tree_size_list:
-                                for epochs in epoch_list:
-                                    for decay_factor in decay_factor_list:
-                                        for alpha_0 in alpha_0_list:
+                        for target_tree_size in c.target_tree_size_list:
+                            for source_tree_size in c.source_tree_size_list:
+                                for epochs in c.epoch_list:
+                                    for decay_factor in c.decay_factor_list:
+                                        for alpha_0 in c.alpha_0_list:
                                             losses_target, losses_source, losses_test, epochs_test, leaf_gammas_tray, leaf_gammashats_tray, model_tray_clf, model_tray_clfhat, alpha_tray = LSTreeBoost(
                                                 a_train,
                                                 b_train,
