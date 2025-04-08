@@ -1,4 +1,4 @@
-RESPONSE = 'Dgv'  #'Basal_area'
+RESPONSE = 'Hgv'  #Dgv  #'Basal_area'
 TARGET = 'Norrland'  #Lettland
 
 # predictor_columns
