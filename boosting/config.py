@@ -1,5 +1,13 @@
-RESPONSE = 'diameter'  #''grundyta'
-TARGET = 'N.Norrland'
+RESPONSE = 'D_AVERAGE'  #''grundyta'
+TARGET = 'N.Norrland'  #Lettland
+
+# predictor_columns
+predictor_columns = [
+    'zq5', 'zq10', 'zq15', 'zq20', 'zq25', 'zq30', 'zq35', 'zq40', 'zq45',
+    'zq50', 'zq55', 'zq60', 'zq65', 'zq70', 'zq75', 'zq80', 'zq85', 'zq90',
+    'zq95', 'pzabovezmean', 'pzabove2', 'zpcum1', 'zpcum2', 'zpcum3', 'zpcum4',
+    'zpcum5', 'zpcum6', 'zpcum7', 'zpcum8', 'zpcum9'
+]
 
 #resultat-fil res_{TARGET}_{RESPONSE}_{IDX}
 ## transfer config

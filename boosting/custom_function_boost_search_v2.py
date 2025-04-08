@@ -17,73 +17,66 @@ def train_run(idx):
 
     def create_train_test_split(test_size=0.25,
                                 train_size=0.5,
-                                target_col="Dgv",
-                                use_sweden=False,
+                                RESPONSE="Dgv",
+                                TARGET='N.Norrland',
                                 test_seed=1,
                                 train_seed=1):
 
         #define predictor columns and target column
-        predictor_columns = [
-            'zq5', 'zq10', 'zq15', 'zq20', 'zq25', 'zq30', 'zq35', 'zq40',
-            'zq45', 'zq50', 'zq55', 'zq60', 'zq65', 'zq70', 'zq75', 'zq80',
-            'zq85', 'zq90', 'zq95', 'pzabovezmean', 'pzabove2', 'zpcum1',
-            'zpcum2', 'zpcum3', 'zpcum4', 'zpcum5', 'zpcum6', 'zpcum7',
-            'zpcum8', 'zpcum9'
-        ]
+        predictor_columns = c.predictor_columns
 
-        target_column = 'D_AVERAGE'
+        target_column = c.RESPONSE
 
+        #data from Svedala
         data_sweden = pd.read_csv(
             'Image_data/merged_data_permanent_cleaned.csv', index_col=[0])
 
         #rename 'Hgv' to 'H_AVERAGE'
-        data_sweden = data_sweden.rename(columns={target_col: "D_AVERAGE"})
+        #data_sweden = data_sweden.rename(columns={RESPONSE: "D_AVERAGE"})
 
         #for training and testing on Sweden only
-        data_train_sweden_1 = data_sweden[data_sweden['area_code'] == 4]
+        train_target = data_sweden[data_sweden['area_code'] == 4]
         data_train_sweden_2 = data_sweden[data_sweden['area_code'] == 2]
         data_train_sweden_3 = data_sweden[data_sweden['area_code'] == 3]
         data_train_sweden_4 = data_sweden[data_sweden['area_code'] == 1]
 
         #data_train_sweden_234 = data_train_sweden_4
-        data_train_sweden_234 = pd.concat(
-            [data_train_sweden_2, data_train_sweden_3])
-        data_train_sweden_234 = pd.concat(
-            [data_train_sweden_234, data_train_sweden_4])
-        data_train_sweden, data_test_sweden_1 = train_test_split(
-            data_train_sweden_1, test_size=test_size,
+        train_source = pd.concat([data_train_sweden_2, data_train_sweden_3])
+        train_source = pd.concat([train_source, data_train_sweden_4])
+        data_train_sweden, test_target = train_test_split(
+            train_target, test_size=test_size,
             random_state=test_seed)  #random_state is fixed
 
-        data_train_sweden_1, data_test = train_test_split(
+        train_target, _ = train_test_split(
             data_train_sweden,
             test_size=1 - train_size,
             random_state=train_seed
         )  #random state is not fixed, data_test unused
 
-        if use_sweden == False:
+        if TARGET == 'Lettland':
             #evaluate and rain on latvia instead (keep naming for simplicity)
             data_latvia = pd.read_csv(
                 'Latvian_Image_data/merged_data_cleaned.csv')
-            data_train_sweden, data_test_sweden_1 = train_test_split(
+            data_train_sweden, test_target = train_test_split(
                 data_latvia, test_size=test_size,
                 random_state=test_seed)  #random_state is fixed
 
-            data_train_sweden_1, data_test = train_test_split(
+            train_target, _ = train_test_split(
                 data_train_sweden,
                 test_size=1 - train_size,
                 random_state=train_seed
             )  #random state is not fixed, data_test unused
 
         #"General" base dataset (to use for transfer)
-        ahat_train = np.array(data_train_sweden_234[predictor_columns])
-        bhat_train = np.array(data_train_sweden_234[target_column])
+        ahat_train = np.array(train_source[predictor_columns])
+        bhat_train = np.array(train_source[target_column])
 
         #Specific train and test set
-        a_train = np.array(data_train_sweden_1[predictor_columns])
-        b_train = np.array(data_train_sweden_1[target_column])
+        a_train = np.array(train_target[predictor_columns])
+        b_train = np.array(train_target[target_column])
 
-        x_test = np.array(data_test_sweden_1[predictor_columns])
-        y_test = np.array(data_test_sweden_1[target_column])
+        x_test = np.array(test_target[predictor_columns])
+        y_test = np.array(test_target[target_column])
 
         return ahat_train, bhat_train, a_train, b_train, x_test, y_test
 
@@ -351,8 +344,8 @@ def train_run(idx):
                     ahat_train, bhat_train, a_train, b_train, x_test, y_test = create_train_test_split(
                         test_size=test_size,
                         train_size=train_size,
-                        target_col="Dgv",
-                        use_sweden=False,
+                        RESPONSE=c.RESPONSE,
+                        TARGET=c.TARGET,
                         test_seed=test_seed,
                         train_seed=train_seed)
                     for v1 in v1_list:
