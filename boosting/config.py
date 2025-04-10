@@ -1,5 +1,5 @@
-RESPONSE = 'Volume'  #Dgv  #'Basal_area'
-TARGET = 'Lettland'  # 'Norrland'
+RESPONSE = 'Hgv'  #Dgv  #'Basal_area'
+TARGET = 'Norrland'  #Lettland
 
 # predictor_columns
 predictor_columns = [
