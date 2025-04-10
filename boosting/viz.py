@@ -10,7 +10,7 @@ import os
 VIZ_FOLDER = 'viz'
 RES_FOLDER = 'res'
 TARGET_DATA = 'Norrland'
-RESPONSE_VARIABLE = 'Hgv'
+RESPONSE_VARIABLE = 'Volume'
 
 def combine_datasets(TARGET_DATA, RESPONSE_VARIABLE):
 
@@ -55,6 +55,5 @@ def create_box_plot(data, data_notransfer, top):
     return None
 
 data = combine_datasets(TARGET_DATA, RESPONSE_VARIABLE)
-print(data)
 data_notransfer = read_notransfer_data(TARGET_DATA, RESPONSE_VARIABLE)
 create_box_plot(data, data_notransfer, 10)
