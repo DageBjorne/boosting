@@ -9,7 +9,7 @@ import os
 
 VIZ_FOLDER = 'viz'
 RES_FOLDER = 'res'
-TARGET_DATA = 'Lettland'
+TARGET_DATA = 'Norrland'
 RESPONSE_VARIABLE = 'Volume'
 
 def combine_datasets(TARGET_DATA, RESPONSE_VARIABLE):
@@ -53,9 +53,9 @@ def find_optimal_params(data):
     return datas.sort_values(by = "total_rank")
 
 
-def create_box_plot(data, data_notransfer, top):
+def create_plots(data, data_notransfer, top):
 
-    datavis = pd.DataFrame(columns = ['method', 'rmse', 'train_size'])
+    datavis = pd.DataFrame(columns = ['method', 'rmse', 'train_size', 'decay_factor', 'source_tree_size', 'target_tree_size', 'v'])
     best_rows_transfer = pd.DataFrame()
     best_rows_notransfer = pd.DataFrame()
     for train_size in np.unique(data['train_size']):
@@ -68,11 +68,30 @@ def create_box_plot(data, data_notransfer, top):
         best_rows_transfer = pd.concat([best_rows_transfer, best_row_transfer])
         best_rows_notransfer = pd.concat([best_rows_notransfer, best_row_notransfer])
         for index, row in best_row_transfer.iterrows():
-            datavis.loc[len(datavis)] = ['transfer', row['test_rmse'], row['train_size']]
+            datavis.loc[len(datavis)] = ['transfer', row['test_rmse'], row['train_size'], row['decay_factor'], row['source_tree_size'], row['target_tree_size'], row['v']]
         for index, row in best_row_notransfer.iterrows():
-            datavis.loc[len(datavis)] = ['no_transfer', row['test_rmse'], row['train_size']]
+            datavis.loc[len(datavis)] = ['no_transfer', row['test_rmse'], row['train_size'], None, None, row['tree_size'], row['v']]
     sns.lineplot(data=datavis, x='train_size', y='rmse', hue = 'method')
-    plt.savefig(os.path.join(VIZ_FOLDER, f'results_{TARGET_DATA}_{RESPONSE_VARIABLE}.jpg'))
+    plt.savefig(os.path.join(VIZ_FOLDER, f'results_{TARGET_DATA}_{RESPONSE_VARIABLE}_rmse.jpg'))
+    plt.close('all')
+    sns.lineplot(data=datavis[datavis['method'] == 'transfer'], x='train_size', y='decay_factor')
+    plt.savefig(os.path.join(VIZ_FOLDER, f'results_{TARGET_DATA}_{RESPONSE_VARIABLE}_tau.jpg'))
+    plt.close('all')
+    sns.lineplot(data=datavis[datavis['method'] == 'transfer'], x='train_size', y='source_tree_size')
+    plt.savefig(os.path.join(VIZ_FOLDER, f'results_{TARGET_DATA}_{RESPONSE_VARIABLE}_source_tree_size.jpg'))
+    plt.close('all')
+    sns.lineplot(data=datavis[datavis['method'] == 'transfer'], x='train_size', y='target_tree_size')
+    plt.savefig(os.path.join(VIZ_FOLDER, f'results_{TARGET_DATA}_{RESPONSE_VARIABLE}_target_tree_size.jpg'))
+    plt.close('all')
+    sns.lineplot(data=datavis[datavis['method'] == 'transfer'], x='train_size', y='v')
+    plt.savefig(os.path.join(VIZ_FOLDER, f'results_{TARGET_DATA}_{RESPONSE_VARIABLE}_v.jpg'))
+    plt.close('all')
+    sns.lineplot(data=datavis[datavis['method'] == 'no_transfer'], x='train_size', y='v')
+    plt.savefig(os.path.join(VIZ_FOLDER, f'results_{TARGET_DATA}_{RESPONSE_VARIABLE}_v-notransfer.jpg'))
+    plt.close('all')
+    sns.lineplot(data=datavis[datavis['method'] == 'no_transfer'], x='train_size', y='target_tree_size')
+    plt.savefig(os.path.join(VIZ_FOLDER, f'results_{TARGET_DATA}_{RESPONSE_VARIABLE}_treesize-notransfer.jpg'))
+    plt.close('all')
     return None
 
 data = combine_datasets(TARGET_DATA, RESPONSE_VARIABLE)
@@ -81,4 +100,4 @@ data_params = find_optimal_params(data)
 data_params.to_csv(os.path.join(VIZ_FOLDER, f'optimal_params_{TARGET_DATA}_{RESPONSE_VARIABLE}.csv'))
 data_notransfer_params = find_optimal_params(data_notransfer)
 data_notransfer_params.to_csv(os.path.join(VIZ_FOLDER, f'optimal_params_{TARGET_DATA}_{RESPONSE_VARIABLE}_notransfer.csv'))
-create_box_plot(data, data_notransfer, 10)
+create_plots(data, data_notransfer, 10)
