@@ -9,7 +9,7 @@ import os
 
 VIZ_FOLDER = 'viz'
 RES_FOLDER = 'res'
-TARGET_DATA = 'Norrland'
+TARGET_DATA = 'Lettland'
 RESPONSE_VARIABLE = 'Volume'
 
 def combine_datasets(TARGET_DATA, RESPONSE_VARIABLE):
@@ -33,6 +33,25 @@ def read_notransfer_data(TARGET_DATA, RESPONSE_VARIABLE):
     data = pd.read_csv(filtered_file, index_col = [0])
     return data
 
+def find_optimal_params(data):
+    datas = pd.DataFrame()
+    for train_size in np.unique(data['train_size']):
+        data_ = data[data['train_size'] == train_size]
+        data_.index = range(1, len(data_) + 1)
+        data_["setting_id"] = data_.index
+        data_ = data_.sort_values(by = 'test_rmse')
+        data_.index = range(1, len(data_) + 1)
+        data_["rank"] = data_.index
+        datas = pd.concat([datas, data_])
+
+        datas.index = range(len(datas))
+        datas["total_rank"] = 0
+        #datas = datas.sort_values(by = 'id')
+        for setting_id in np.unique(datas["setting_id"]):
+            indexes = np.where(datas["setting_id"] == setting_id)[0]
+            datas.loc[indexes, "total_rank"] = datas.loc[indexes, "rank"].sum()
+    return datas.sort_values(by = "total_rank")
+
 
 def create_box_plot(data, data_notransfer, top):
 
@@ -52,12 +71,14 @@ def create_box_plot(data, data_notransfer, top):
             datavis.loc[len(datavis)] = ['transfer', row['test_rmse'], row['train_size']]
         for index, row in best_row_notransfer.iterrows():
             datavis.loc[len(datavis)] = ['no_transfer', row['test_rmse'], row['train_size']]
-    best_rows_transfer.to_csv(os.path.join(VIZ_FOLDER, f'optimal_params_{TARGET_DATA}_{RESPONSE_VARIABLE}.csv'))
-    best_rows_notransfer.to_csv(os.path.join(VIZ_FOLDER, f'optimal_params_{TARGET_DATA}_{RESPONSE_VARIABLE}_notransfer.csv'))
     sns.lineplot(data=datavis, x='train_size', y='rmse', hue = 'method')
     plt.savefig(os.path.join(VIZ_FOLDER, f'results_{TARGET_DATA}_{RESPONSE_VARIABLE}.jpg'))
     return None
 
 data = combine_datasets(TARGET_DATA, RESPONSE_VARIABLE)
 data_notransfer = read_notransfer_data(TARGET_DATA, RESPONSE_VARIABLE)
+data_params = find_optimal_params(data)
+data_params.to_csv(os.path.join(VIZ_FOLDER, f'optimal_params_{TARGET_DATA}_{RESPONSE_VARIABLE}.csv'))
+data_notransfer_params = find_optimal_params(data_notransfer)
+data_notransfer_params.to_csv(os.path.join(VIZ_FOLDER, f'optimal_params_{TARGET_DATA}_{RESPONSE_VARIABLE}_notransfer.csv'))
 create_box_plot(data, data_notransfer, 10)
