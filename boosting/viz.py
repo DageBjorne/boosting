@@ -9,7 +9,7 @@ import os
 
 VIZ_FOLDER = 'viz'
 RES_FOLDER = 'res'
-TARGET_DATA = 'Lettland'
+TARGET_DATA = 'Norrland'
 RESPONSE_VARIABLE = 'Volume'
 
 def combine_datasets(TARGET_DATA, RESPONSE_VARIABLE):
@@ -37,6 +37,8 @@ def read_notransfer_data(TARGET_DATA, RESPONSE_VARIABLE):
 def create_box_plot(data, data_notransfer, top):
 
     datavis = pd.DataFrame(columns = ['method', 'rmse', 'train_size'])
+    best_rows_transfer = pd.DataFrame()
+    best_rows_notransfer = pd.DataFrame()
     for train_size in np.unique(data['train_size']):
         data_ = data[data['train_size'] == train_size]
         data_notransfer_ = data_notransfer[data_notransfer['train_size'] == train_size]
@@ -44,12 +46,14 @@ def create_box_plot(data, data_notransfer, top):
         sorted_rmse_data_notransfer = sorted(data_notransfer_['test_rmse'])[0:top]
         best_row_transfer = data_[data_['test_rmse'] <= sorted_rmse_data[top-1]]
         best_row_notransfer = data_notransfer_[data_notransfer_['test_rmse'] <= sorted_rmse_data_notransfer[top-1]]
-
+        best_rows_transfer = pd.concat([best_rows_transfer, best_row_transfer])
+        best_rows_notransfer = pd.concat([best_rows_notransfer, best_row_notransfer])
         for index, row in best_row_transfer.iterrows():
             datavis.loc[len(datavis)] = ['transfer', row['test_rmse'], row['train_size']]
         for index, row in best_row_notransfer.iterrows():
             datavis.loc[len(datavis)] = ['no_transfer', row['test_rmse'], row['train_size']]
-
+    best_rows_transfer.to_csv(os.path.join(VIZ_FOLDER, f'optimal_params_{TARGET_DATA}_{RESPONSE_VARIABLE}.csv'))
+    best_rows_notransfer.to_csv(os.path.join(VIZ_FOLDER, f'optimal_params_{TARGET_DATA}_{RESPONSE_VARIABLE}_notransfer.csv'))
     sns.lineplot(data=datavis, x='train_size', y='rmse', hue = 'method')
     plt.savefig(os.path.join(VIZ_FOLDER, f'results_{TARGET_DATA}_{RESPONSE_VARIABLE}.jpg'))
     return None
