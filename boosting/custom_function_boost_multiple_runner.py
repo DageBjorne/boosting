@@ -23,7 +23,7 @@ source_tree_size = 3
 decay_factor = 0.997
 alpha_0 = 1.0
 # = 127
-test_size = 1.0
+test_size = 0.25
 RUNS = 10
 
 
