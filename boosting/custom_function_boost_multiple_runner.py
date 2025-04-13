@@ -391,4 +391,4 @@ for t in range(1, 20):
             len(x_test), v1, target_tree_size, source_tree_size, epochs,
             decay_factor, alpha_0, test_rmse
         ]
-        df.to_csv(f'res/results_optim_{c.TARGET}_{c.RESPONSE}_{i}.csv')
+        df.to_csv(f'res/results_optim_{c.TARGET}_{c.RESPONSE}.csv')
