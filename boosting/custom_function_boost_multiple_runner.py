@@ -15,16 +15,12 @@ import os
 
 import config as c
 
-v1 = 0.07
-v2 = v1
-epochs = 600
-target_tree_size = 1
-source_tree_size = 3
-decay_factor = 0.997
-alpha_0 = 1.0
-# = 127
-test_size = 0.25
+#TARGET = 'N.Norrland'  #Lettland
+#RESPONSE = 'Hgv'  #Dgv #Volume
 RUNS = 10
+
+#läs in tio bästa från motsvarande param-csv
+#kör 10 körningar för varje parameter-uppsättning
 
 
 def create_train_test_split(test_size=0.25,
@@ -347,48 +343,74 @@ df = pd.DataFrame(columns=[
     'target_tree_size', 'source_tree_size', 'epochs', 'decay_factor',
     'alpha_0', 'test_rmse'
 ])
-for t in range(1, 20):
-    train_size = (t * 1.0) / 20
-    print(train_size)
-    for i in range(RUNS):
-        ahat_train, bhat_train, a_train, b_train, x_test, y_test = create_train_test_split(
-            test_size=test_size,
-            train_size=train_size,
-            RESPONSE=c.RESPONSE,
-            TARGET=c.TARGET,
-            test_seed=i,
-            train_seed=i + RUNS)
 
-        losses_target, losses_source, losses_test, epochs_test, leaf_gammas_tray, leaf_gammashats_tray, model_tray_clf, model_tray_clfhat, alpha_tray = LSTreeBoost(
-            a_train,
-            b_train,
-            ahat_train,
-            bhat_train,
-            x_test,
-            y_test,
-            v1=v1,
-            v2=v2,
-            epochs=epochs,
-            target_tree_size=target_tree_size,
-            source_tree_size=source_tree_size,
-            alpha_0=alpha_0,
-            decay_factor=decay_factor,
-            eval=True)
-        preds = boosted_prediction(x_test,
-                                   a_train,
-                                   b_train,
-                                   model_tray_clf,
-                                   model_tray_clfhat,
-                                   leaf_gammas_tray,
-                                   leaf_gammashats_tray,
-                                   v1=v1,
-                                   v2=v2,
-                                   alpha_tray=alpha_tray)
-        test_rmse = compute_rmse(preds, y_test)
-        df.loc[len(df)] = [
-            int(i), i, i + RUNS,
-            len(a_train),
-            len(x_test), v1, target_tree_size, source_tree_size, epochs,
-            decay_factor, alpha_0, test_rmse
-        ]
-        df.to_csv(f'res/results_optim_{c.TARGET}_{c.RESPONSE}.csv')
+param_list = pd.read_csv(
+    f"res/optimal_params/optimal_params_{c.TARGET}_{c.RESPONSE}.csv")
+
+cols = [
+    'v', 'target_tree_size', 'source_tree_size', 'epochs', 'decay_factor',
+    'alpha_0', 'total_rank'
+]
+param_list = param_list[cols].drop_duplicates()
+param_list = param_list.sort_values(by='total_rank',
+                                    ascending=True).reset_index()
+
+# loop over the tio besten paramsinsettlings!!!
+for RUN in range(RUNS):
+    for i in range(10):
+        v1 = param_list['v'][i]
+        v2 = v1
+        epochs = int(param_list['epochs'][i])
+        target_tree_size = int(param_list['target_tree_size'][i])
+        source_tree_size = int(param_list['source_tree_size'][i])
+        decay_factor = param_list['decay_factor'][i]
+        alpha_0 = param_list['alpha_0'][i]
+        test_size = 0.1
+
+        for t in range(1, 20):
+            train_size = (t * 1.0) / 20
+            print(train_size)
+            for i in range(RUNS):
+                ahat_train, bhat_train, a_train, b_train, x_test, y_test = create_train_test_split(
+                    test_size=test_size,
+                    train_size=train_size,
+                    RESPONSE=c.RESPONSE,
+                    TARGET=c.TARGET,
+                    test_seed=i,
+                    train_seed=i + RUNS)
+
+                losses_target, losses_source, losses_test, epochs_test, leaf_gammas_tray, leaf_gammashats_tray, model_tray_clf, model_tray_clfhat, alpha_tray = LSTreeBoost(
+                    a_train,
+                    b_train,
+                    ahat_train,
+                    bhat_train,
+                    x_test,
+                    y_test,
+                    v1=v1,
+                    v2=v2,
+                    epochs=epochs,
+                    target_tree_size=target_tree_size,
+                    source_tree_size=source_tree_size,
+                    alpha_0=alpha_0,
+                    decay_factor=decay_factor,
+                    eval=True)
+                preds = boosted_prediction(x_test,
+                                           a_train,
+                                           b_train,
+                                           model_tray_clf,
+                                           model_tray_clfhat,
+                                           leaf_gammas_tray,
+                                           leaf_gammashats_tray,
+                                           v1=v1,
+                                           v2=v2,
+                                           alpha_tray=alpha_tray)
+                test_rmse = compute_rmse(preds, y_test)
+                df.loc[len(df)] = [
+                    int(i), i, i + RUNS,
+                    len(a_train),
+                    len(x_test), v1, target_tree_size, source_tree_size,
+                    epochs, decay_factor, alpha_0, test_rmse
+                ]
+                df.to_csv(
+                    f'res/optimal_res/results_optim_{c.TARGET}_{c.RESPONSE}_{RUN}.csv'
+                )
