@@ -1,5 +1,5 @@
-RESPONSE = 'Dgv'  #Hgv  #'Dgv'
-TARGET = 'Lettland'  #Lettland
+RESPONSE = 'Hgv'  #Hgv  #'Dgv'
+TARGET = 'Norrland'  #Lettland
 
 # predictor_columns
 predictor_columns = [
