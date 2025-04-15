@@ -10,7 +10,7 @@ import os
 VIZ_FOLDER = 'viz\optimal_viz'
 RES_FOLDER = 'res\optimal_res'
 TARGET_DATA = 'Lettland'
-RESPONSE_VARIABLE = 'Dgv'
+RESPONSE_VARIABLE = 'Volume'
 
 def combine_datasets(TARGET_DATA, RESPONSE_VARIABLE):
     matching_files = glob.glob(os.path.join(RES_FOLDER, f'results_optim_{TARGET_DATA}_{RESPONSE_VARIABLE}*.csv'))
@@ -32,7 +32,7 @@ def create_plots(data, data_notransfer):
     data_notransfer['method'] = 'no_transfer'
     columns = ['method', 'train_size', 'test_rmse']
     datavis = pd.concat([data[columns], data_notransfer[columns]])
-    sns.lineplot(data=datavis, x='train_size', y='test_rmse', hue = 'method')
+    sns.pointplot(data=datavis, x='train_size', y='test_rmse', hue = 'method')
     plt.savefig(os.path.join(VIZ_FOLDER, f'results_{TARGET_DATA}_{RESPONSE_VARIABLE}.jpg'))
     plt.close('all')
     return None
