@@ -17,7 +17,7 @@ import config as c
 
 #TARGET = 'N.Norrland'  #Lettland
 #RESPONSE = 'Hgv'  #Dgv #Volume
-RUNS = 10
+RUNS = 50
 
 #läs in tio bästa från motsvarande param-csv
 #kör 10 körningar för varje parameter-uppsättning
@@ -153,6 +153,12 @@ def LSTreeBoost(a, b, x_test, y_test, epochs = 100, v = 0.1, tree_size = 2, eval
         
         
     return model_tray, leaf_means_tray, losses, losses_test, epochs_test
+
+
+
+
+
+
 df = pd.DataFrame(columns=[
     'id', 'train_seed', 'test_seed', 'train_size', 'test_size', 'v',
     'tree_size', 'epochs', 'test_rmse'
@@ -162,8 +168,8 @@ param_list = pd.read_csv(
     f"res/optimal_params/optimal_params_{c.TARGET}_{c.RESPONSE}_notransfer.csv")
 
 cols = [
-    'v', 'tree_size', 'epochs',
-'total_rank'
+    'train_size', 'v', 'tree_size', 'epochs',
+    'total_rank', 'rank'
 ]
 param_list = param_list[cols].drop_duplicates()
 param_list = param_list.sort_values(by='total_rank',
@@ -171,34 +177,44 @@ param_list = param_list.sort_values(by='total_rank',
 
 # loop over the tio besten paramsinsettlings!!!
 
-for j in range(10):
-    v = param_list['v'][j]
-    epochs = int(param_list['epochs'][j])
-    tree_size = int(param_list['tree_size'][j])
-    test_size = 0.1
+#for j in range(10):
+# för varje train_size välj bästa!!!
 
-    for t in range(1, 20):
-        train_size = (t * 1.0) / 20
-        print(train_size)
-        for i in range(RUNS):
-            ahat_train, bhat_train, a_train, b_train, x_test, y_test = create_train_test_split(
-                test_size=test_size,
-                train_size=train_size,
-                RESPONSE=c.RESPONSE,
-                TARGET=c.TARGET,
-                test_seed=i,
-                train_seed=i + RUNS)
+test_size = 0.25
 
-            model_tray, leaf_means_tray, losses, losses_test, epochs_test = LSTreeBoost(a_train, b_train, x_test, y_test, v=v,
+j = 0
+for t in c.train_size_list:
+    train_size = t  #(t * 1.0) / 20
+
+    p_list = param_list[param_list['train_size'] ==
+                        np.unique(param_list['train_size'])[j]]  ## train_size in percetntae fix!!!
+    j += 1
+    p_list = p_list.sort_values(by='rank', ascending=True).reset_index()
+    #print(p_list)
+    v = p_list['v'][0]
+    epochs = int(p_list['epochs'][0])
+    tree_size = int(p_list['tree_size'][0])
+
+
+    for i in range(RUNS):
+        ahat_train, bhat_train, a_train, b_train, x_test, y_test = create_train_test_split(
+            test_size=test_size,
+            train_size=train_size,
+            RESPONSE=c.RESPONSE,
+            TARGET=c.TARGET,
+            test_seed=i,
+            train_seed=i + RUNS)
+
+        model_tray, leaf_means_tray, losses, losses_test, epochs_test = LSTreeBoost(a_train, b_train, x_test, y_test, v=v,
                                                                                                         tree_size=tree_size,
                                                                                                         epochs = epochs)
-            preds = boosted_prediction(x_test, b_train, model_tray, leaf_means_tray, v=v)
-            test_rmse = compute_rmse(preds, y_test)
-            df.loc[len(df)] = [
-                int(i), i, i + RUNS,
-                len(a_train),
-                len(x_test), v, tree_size, epochs,
-                test_rmse
-            ]
-            df.to_csv(
-                f'res/optimal_res/results_optim_{c.TARGET}_{c.RESPONSE}_notransfer.csv')
+        preds = boosted_prediction(x_test, b_train, model_tray, leaf_means_tray, v=v)
+  
+        test_rmse = compute_rmse(preds, y_test)
+        df.loc[len(df)] = [
+            int(i), i, i + RUNS,
+            len(a_train),
+            len(x_test), v, tree_size, epochs,
+            test_rmse
+        ]
+        df.to_csv(f'res/optimal_res/results_optim_{c.TARGET}_{c.RESPONSE}_notransfer.csv')

@@ -362,13 +362,15 @@ param_list = param_list.sort_values(by='total_rank',
 
 test_size = 0.25
 
+j = 0
 for t in c.train_size_list:
     train_size = t  #(t * 1.0) / 20
 
     p_list = param_list[param_list['train_size'] ==
-                        train_size]  ## train_size in percetntae fix!!!
+                        np.unique(param_list['train_size'])[j]]  ## train_size in percetntae fix!!!
+    j += 1
     p_list = p_list.sort_values(by='rank', ascending=True).reset_index()
-    print(p_list)
+    #print(p_list)
     v1 = p_list['v'][0]
     v2 = v1
     epochs = int(p_list['epochs'][0])
