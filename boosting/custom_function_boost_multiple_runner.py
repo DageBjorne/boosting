@@ -363,11 +363,11 @@ param_list = param_list.sort_values(by='total_rank',
 test_size = 0.25
 
 j = 0
-for t in c.train_size_list:
+for t in c.train_size_list:  #[0.99]:  #
     train_size = t  #(t * 1.0) / 20
 
-    p_list = param_list[param_list['train_size'] ==
-                        np.unique(param_list['train_size'])[j]]  ## train_size in percetntae fix!!!
+    p_list = param_list[param_list['train_size'] == np.unique(
+        param_list['train_size'])[j]]  ## train_size in percetntae fix!!!
     j += 1
     p_list = p_list.sort_values(by='rank', ascending=True).reset_index()
     #print(p_list)
