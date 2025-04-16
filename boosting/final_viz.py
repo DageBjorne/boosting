@@ -9,8 +9,18 @@ import os
 
 VIZ_FOLDER = 'viz\optimal_viz'
 RES_FOLDER = 'res\optimal_res'
-TARGET_DATA = 'Norrland'
-RESPONSE_VARIABLE = 'Hgv'
+TARGET_DATA = 'Lettland'
+RESPONSE_VARIABLE = 'Volume'
+
+if RESPONSE_VARIABLE == 'Dgv':
+    label_to_use = 'Average diameter'
+    unit = 'cm'
+if RESPONSE_VARIABLE == 'Hgv':
+    label_to_use = 'Average height'
+    unit = 'm'
+if RESPONSE_VARIABLE == 'Volume':
+    label_to_use = 'Volume'
+    unit = 'm$^3$ / ha'
 
 def combine_datasets(TARGET_DATA, RESPONSE_VARIABLE):
     matching_files = glob.glob(os.path.join(RES_FOLDER, f'results_optim_{TARGET_DATA}_{RESPONSE_VARIABLE}*.csv'))
@@ -31,8 +41,11 @@ def create_plots(data, data_notransfer):
     data['method'] = 'transfer'
     data_notransfer['method'] = 'no_transfer'
     columns = ['method', 'train_size', 'test_rmse']
-    datavis = pd.concat([data[columns], data_notransfer[columns]])
+    datavis = pd.concat([data_notransfer[columns], data[columns]])
     sns.pointplot(data=datavis, x='train_size', y='test_rmse', hue = 'method')
+    plt.xlabel("train size")     # X-axis label
+    plt.ylabel(f"RMSE ({unit})")  # Y-axis label
+    plt.title(f" {label_to_use}, {TARGET_DATA}")    # Optional title
     plt.savefig(os.path.join(VIZ_FOLDER, f'results_{TARGET_DATA}_{RESPONSE_VARIABLE}.jpg'))
     plt.close('all')
     return None
