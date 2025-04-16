@@ -10,7 +10,7 @@ import os
 VIZ_FOLDER = 'viz\optimal_viz'
 RES_FOLDER = 'res\optimal_res'
 TARGET_DATA = 'Lettland'
-RESPONSE_VARIABLE = 'Volume'
+RESPONSE_VARIABLE = 'Hgv'
 
 def combine_datasets(TARGET_DATA, RESPONSE_VARIABLE):
     matching_files = glob.glob(os.path.join(RES_FOLDER, f'results_optim_{TARGET_DATA}_{RESPONSE_VARIABLE}*.csv'))
