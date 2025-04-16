@@ -340,7 +340,7 @@ def train_run(idx):
     i = 0
     for train_seed in c.train_seed_list:
         for test_seed in c.test_seed_list:
-            for train_size in c.train_size_list:
+            for train_size in c.train_size_list:  #[0.99]:  #
                 for test_size in c.test_size_list:
                     ahat_train, bhat_train, a_train, b_train, x_test, y_test = create_train_test_split(
                         test_size=test_size,
@@ -396,6 +396,7 @@ def train_run(idx):
                                                 test_rmse
                                             ]
                                             df.to_csv(
+                                                #f'res/results_{c.TARGET}_{c.RESPONSE}_{idx}_UPDATED.csv'
                                                 f'res/results_{c.TARGET}_{c.RESPONSE}_{idx}.csv'
                                             )
                                             # Plot loss curve
