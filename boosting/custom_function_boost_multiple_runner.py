@@ -352,8 +352,7 @@ cols = [
     'decay_factor', 'alpha_0', 'total_rank', 'rank'
 ]
 param_list = param_list[cols].drop_duplicates()
-param_list = param_list.sort_values(by='total_rank',
-                                    ascending=True).reset_index()
+param_list = param_list.sort_values(by='rank', ascending=True).reset_index()
 
 # loop over the tio besten paramsinsettlings!!!
 
@@ -370,6 +369,7 @@ for t in c.train_size_list:  #[0.99]:  #
         param_list['train_size'])[j]]  ## train_size in percetntae fix!!!
     j += 1
     p_list = p_list.sort_values(by='rank', ascending=True).reset_index()
+
     #print(p_list)
     v1 = p_list['v'][0]
     v2 = v1
@@ -378,6 +378,8 @@ for t in c.train_size_list:  #[0.99]:  #
     source_tree_size = int(p_list['source_tree_size'][0])
     decay_factor = p_list['decay_factor'][0]
     alpha_0 = p_list['alpha_0'][0]
+    #print(v1, v2, epochs, target_tree_size, source_tree_size, decay_factor,
+    #      alpha_0)
 
     for i in range(RUNS):
         ahat_train, bhat_train, a_train, b_train, x_test, y_test = create_train_test_split(
@@ -420,4 +422,6 @@ for t in c.train_size_list:  #[0.99]:  #
             len(x_test), v1, target_tree_size, source_tree_size, epochs,
             decay_factor, alpha_0, test_rmse
         ]
-        df.to_csv(f'res/optimal_res/results_optim_{c.TARGET}_{c.RESPONSE}.csv')
+        df.to_csv(
+            #f'res/optimal_res/results_optim_{c.TARGET}_{c.RESPONSE}_UPDATED.csv'
+            f'res/optimal_res/results_optim_{c.TARGET}_{c.RESPONSE}.csv')
