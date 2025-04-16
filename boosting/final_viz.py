@@ -9,7 +9,7 @@ import os
 
 VIZ_FOLDER = 'viz\optimal_viz'
 RES_FOLDER = 'res\optimal_res'
-TARGET_DATA = 'Lettland'
+TARGET_DATA = 'Norrland'
 RESPONSE_VARIABLE = 'Hgv'
 
 def combine_datasets(TARGET_DATA, RESPONSE_VARIABLE):
