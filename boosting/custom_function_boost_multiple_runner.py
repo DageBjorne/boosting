@@ -370,7 +370,6 @@ for t in c.train_size_list:  #[0.99]:  #
     j += 1
     p_list = p_list.sort_values(by='rank', ascending=True).reset_index()
 
-    #print(p_list)
     v1 = p_list['v'][0]
     v2 = v1
     epochs = int(p_list['epochs'][0])

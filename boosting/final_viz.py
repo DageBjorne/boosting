@@ -10,7 +10,7 @@ import os
 VIZ_FOLDER = 'viz\optimal_viz'
 RES_FOLDER = 'res\optimal_res'
 TARGET_DATA = 'Lettland'
-RESPONSE_VARIABLE = 'Volume'
+RESPONSE_VARIABLE = 'Dgv'
 
 if RESPONSE_VARIABLE == 'Dgv':
     label_to_use = 'Average diameter'
@@ -21,6 +21,11 @@ if RESPONSE_VARIABLE == 'Hgv':
 if RESPONSE_VARIABLE == 'Volume':
     label_to_use = 'Volume'
     unit = 'm$^3$ / ha'
+
+if TARGET_DATA == 'Norrland':
+    title_name = 'N. Norrland'
+else:
+    title_name = 'Latvia'
 
 def combine_datasets(TARGET_DATA, RESPONSE_VARIABLE):
     matching_files = glob.glob(os.path.join(RES_FOLDER, f'results_optim_{TARGET_DATA}_{RESPONSE_VARIABLE}*.csv'))
@@ -38,15 +43,26 @@ def read_notransfer_data(TARGET_DATA, RESPONSE_VARIABLE):
 
 def create_plots(data, data_notransfer):
 
-    data['method'] = 'transfer'
-    data_notransfer['method'] = 'no_transfer'
+    data['method'] = 'L2TransferTreeBoost'
+    data_notransfer['method'] = 'L2TreeBoost'
     columns = ['method', 'train_size', 'test_rmse']
     datavis = pd.concat([data_notransfer[columns], data[columns]])
-    sns.pointplot(data=datavis, x='train_size', y='test_rmse', hue = 'method')
-    plt.xlabel("train size")     # X-axis label
-    plt.ylabel(f"RMSE ({unit})")  # Y-axis label
-    plt.title(f" {label_to_use}, {TARGET_DATA}")    # Optional title
-    plt.savefig(os.path.join(VIZ_FOLDER, f'results_{TARGET_DATA}_{RESPONSE_VARIABLE}.jpg'))
+    datavis['train_size'] = datavis['train_size'].astype(int)
+    custom_palette = {"L2TreeBoost": "black", "L2TransferTreeBoost": "orange"}
+    custom_markers = ["s", "^"]
+    sns.pointplot(data=datavis, x='train_size', y='test_rmse', hue = 'method', 
+                  palette=custom_palette, markers = custom_markers)
+    
+    custom_handles = [
+    plt.Line2D([0], [0], marker='s', color='black', linestyle='-', markersize=10, label='L2TreeBoost'),
+    plt.Line2D([0], [0], marker='^', color='orange', linestyle='-', markersize=10, label='L2TransferTreeBoost'),
+]
+    plt.xlabel("train size", fontsize = 14)     # X-axis label
+    plt.ylabel(f"RMSE ({unit})", fontsize = 14)  # Y-axis label
+    plt.title(f" {label_to_use}", fontsize = 14)    # Optional title
+    plt.legend(fontsize=14)
+    plt.legend(handles=custom_handles, fontsize = 14, title="Method", title_fontsize = 14)
+    plt.savefig(os.path.join(VIZ_FOLDER, f'results_{TARGET_DATA}_{RESPONSE_VARIABLE}.jpg'), dpi = 300)
     plt.close('all')
     return None
 
