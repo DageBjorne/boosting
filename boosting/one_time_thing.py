@@ -338,11 +338,7 @@ def LSTreeBoost(a,
     return losses_target, losses_source, losses_test, epochs_test, leaf_gammas_tray, leaf_gammashats_tray, model_tray_clf, model_tray_clfhat, alpha_tray
 
 
-df = pd.DataFrame(columns=[
-    'id', 'train_seed', 'test_seed', 'train_size', 'test_size', 'v',
-    'target_tree_size', 'source_tree_size', 'epochs', 'decay_factor',
-    'alpha_0', 'test_rmse'
-])
+df = pd.read_csv('res/optimal_res/results_optim_Norrland_Dgv.csv', index_col = [0])
 
 param_list = pd.read_csv(
     f"res/optimal_params/optimal_params_{c.TARGET}_{c.RESPONSE}.csv")
@@ -362,13 +358,11 @@ param_list = param_list.sort_values(by='total_rank',
 
 test_size = 0.25
 
-j = 0
-for t in c.train_size_list:
+for t in [0.99]:
     train_size = t  #(t * 1.0) / 20
 
     p_list = param_list[param_list['train_size'] ==
-                        np.unique(param_list['train_size'])[j]]  ## train_size in percetntae fix!!!
-    j += 1
+                        1258]  ## train_size in percetntae fix!!!
     p_list = p_list.sort_values(by='rank', ascending=True).reset_index()
     print(p_list)
     v1 = p_list['v'][0]
@@ -420,4 +414,4 @@ for t in c.train_size_list:
             len(x_test), v1, target_tree_size, source_tree_size, epochs,
             decay_factor, alpha_0, test_rmse
         ]
-        df.to_csv(f'res/optimal_res/results_optim_{c.TARGET}_{c.RESPONSE}.csv')
+        df.to_csv(f'res/optimal_res/results_optim_{c.TARGET}_{c.RESPONSE}_FINAL.csv')
