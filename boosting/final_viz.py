@@ -9,17 +9,17 @@ import os
 
 VIZ_FOLDER = 'viz\optimal_viz'
 RES_FOLDER = 'res\optimal_res'
-TARGET_DATA = 'Lettland'
+TARGET_DATA = 'Norrland'
 RESPONSE_VARIABLE = 'Dgv'
 
 if RESPONSE_VARIABLE == 'Dgv':
-    label_to_use = 'Average diameter'
+    label_to_use = 'Stem diameter'
     unit = 'cm'
 if RESPONSE_VARIABLE == 'Hgv':
-    label_to_use = 'Average height'
+    label_to_use = 'Tree height'
     unit = 'm'
 if RESPONSE_VARIABLE == 'Volume':
-    label_to_use = 'Volume'
+    label_to_use = 'Stem volume'
     unit = 'm$^3$ / ha'
 
 if TARGET_DATA == 'Norrland':
@@ -51,7 +51,7 @@ def create_plots(data, data_notransfer):
     custom_palette = {"L2TreeBoost": "black", "L2TransferTreeBoost": "orange"}
     custom_markers = ["s", "^"]
     sns.pointplot(data=datavis, x='train_size', y='test_rmse', hue = 'method', 
-                  palette=custom_palette, markers = custom_markers)
+                  palette=custom_palette, markers = custom_markers, dodge=True)
     
     custom_handles = [
     plt.Line2D([0], [0], marker='s', color='black', linestyle='-', markersize=10, label='L2TreeBoost'),
