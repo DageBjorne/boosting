@@ -9,7 +9,7 @@ import os
 
 VIZ_FOLDER = 'viz\optimal_viz'
 RES_FOLDER = 'res\optimal_res'
-TARGET_DATA = 'Norrland'
+TARGET_DATA = 'Lettland'
 RESPONSE_VARIABLE = 'Dgv'
 
 if RESPONSE_VARIABLE == 'Dgv':
@@ -42,29 +42,57 @@ def read_notransfer_data(TARGET_DATA, RESPONSE_VARIABLE):
 
 
 def create_plots(data, data_notransfer):
+    import matplotlib.lines as mlines
 
     data['method'] = 'L2TransferTreeBoost'
     data_notransfer['method'] = 'L2TreeBoost'
     columns = ['method', 'train_size', 'test_rmse']
     datavis = pd.concat([data_notransfer[columns], data[columns]])
     datavis['train_size'] = datavis['train_size'].astype(int)
-    custom_palette = {"L2TreeBoost": "black", "L2TransferTreeBoost": "orange"}
-    custom_markers = ["s", "^"]
-    sns.pointplot(data=datavis, x='train_size', y='test_rmse', hue = 'method', 
-                  palette=custom_palette, markers = custom_markers, dodge=True)
-    
-    custom_handles = [
-    plt.Line2D([0], [0], marker='s', color='black', linestyle='-', markersize=10, label='L2TreeBoost'),
-    plt.Line2D([0], [0], marker='^', color='orange', linestyle='-', markersize=10, label='L2TransferTreeBoost'),
-]
-    plt.xlabel("train size", fontsize = 14)     # X-axis label
-    plt.ylabel(f"RMSE ({unit})", fontsize = 14)  # Y-axis label
-    plt.title(f" {label_to_use}", fontsize = 14)    # Optional title
-    plt.legend(fontsize=14)
-    plt.legend(handles=custom_handles, fontsize = 14, title="Method", title_fontsize = 14)
-    plt.savefig(os.path.join(VIZ_FOLDER, f'results_{TARGET_DATA}_{RESPONSE_VARIABLE}.jpg'), dpi = 300)
+
+    # Compute mean, std, and 95% CI
+    grouped = datavis.groupby(['method', 'train_size'])
+    summary = grouped['test_rmse'].agg(['mean', 'std', 'count']).reset_index()
+    summary['ci95'] = 1.96 * summary['std'] / np.sqrt(summary['count'])
+
+    fig, ax = plt.subplots(figsize=(8, 6))
+
+    method_styles = {
+        'L2TreeBoost': {'color': 'black', 'marker': 's'},
+        'L2TransferTreeBoost': {'color': 'orange', 'marker': '^'}
+    }
+
+    for method, style in method_styles.items():
+        subset = summary[summary['method'] == method]
+        ax.errorbar(
+            subset['train_size'],
+            subset['mean'],
+            yerr=subset['ci95'],
+            fmt=style['marker'] + '-',
+            color=style['color'],
+            label=method,
+            capsize=7,
+            elinewidth=2.5,
+            markerfacecolor=style['color'],
+            markersize=8
+        )
+
+    ax.set_xlabel("Train size", fontsize=24)
+    ax.set_ylabel(f"RMSE ({unit})", fontsize=24)
+    ax.set_title(f"{label_to_use}", fontsize=30, pad = 20)
+    ax.tick_params(axis='both', which='major', labelsize=18) 
+    ax.grid(True)
+
+    handles = [
+        mlines.Line2D([], [], color='black', marker='s', linestyle='-', label='L2TreeBoost', markersize = 10),
+        mlines.Line2D([], [], color='orange', marker='^', linestyle='-', label='L2TransferTreeBoost', markersize = 10)
+    ]
+    ax.legend(handles=handles, title="Method", fontsize=18, title_fontsize=18)
+
+    plt.tight_layout()
+    plt.savefig(os.path.join(VIZ_FOLDER, f'results_{TARGET_DATA}_{RESPONSE_VARIABLE}.jpg'), dpi=300)
     plt.close('all')
-    return None
+
 
 data = combine_datasets(TARGET_DATA, RESPONSE_VARIABLE)
 data_notransfer = read_notransfer_data(TARGET_DATA, RESPONSE_VARIABLE)
